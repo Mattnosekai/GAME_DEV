@@ -1,4 +1,4 @@
-#include "mb_keyboard_lib1.bi"
+#include "mb_keyboard_lib2.bi"
 
 screenres 640,480,32
 
@@ -28,13 +28,13 @@ locate 1,1
 for i=1 to nok_p1
 select case kcs_p1(i)
 case 1
-? scan_codes_p1(i),"Down      ",kps_p1(i),tts_d_p1(i)
+print scan_codes_p1(i),"Down      ",kps_p1(i),tts_d_p1(i)
 case 0
-? scan_codes_p1(i),"-         ",kps_p1(i),tts_u_p1(i)
+print scan_codes_p1(i),"-         ",kps_p1(i),tts_u_p1(i)
 end select
 next
-?
+print
 for i=1 to 30
-? kb_p1(i),str(kts_p1(i))+"                     "
+print kb_p1(i),str(kts_p1(i))+"                     "
 next
 loop until inkey = chr(27)

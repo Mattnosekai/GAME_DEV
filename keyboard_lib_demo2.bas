@@ -1,5 +1,5 @@
 #include "mb_sound_lib2.bi"
-#include "mb_keyboard_lib1.bi"
+#include "mb_keyboard_lib2.bi"
 
 '===============================================================================
 dim shared as boolean ok
@@ -40,19 +40,19 @@ if mid(kb_p1(i2),1,2)="67" then exit for
 'make sure none of the other buttons were pressed after the hadoken motion
 if mid(kb_p1(i2),1,2)="65" then hc=1:hct=kts_p1(i2)-kts_p1(i2-1):exit for
 next
-if hc=1 and hct<=.05 then
+if hc=1 and hct<=.2 then
 cls
 
-? "Hadoken!"
+print "Hadoken!"
 
 play_sound_mc sound(0)
-? kb_p1(1)
+print kb_p1(1)
 for i2=2 to 30
-? kb_p1(i2),kts_p1(i2)-kts_p1(i2-1)    
+print kb_p1(i2),kts_p1(i2)-kts_p1(i2-1)    
 next    
 cls
 mb_kb_clear_p1
-'return 1
+
 hadoken_motion_check_p1=1
 exit function
 end if
@@ -64,14 +64,14 @@ else
     
 end if    
 next
-'return 0
+
 hadoken_motion_check_p1=0
 end function 
 '===============================================================================
 function sonicboom_motion_check_p1 as integer
 'this could also be a function to return if a sonic boom motion    
 'facing right
-dim as integer i,i2,d,dd,f,a,hc
+dim as integer i,i2,d,dd,f,a,hc,hc2
 dim as double dt,ddt,ft,att,hct
 d=0 'down
 dd=0 'down diagnal down & forward at the same time
@@ -83,24 +83,31 @@ ft=0
 att=0
 hc=0
 hct=0
+hc2=0
 
 
+
+for i=1 to 30
+if kb_p1(i)="37U" then    
+mb_keyboard_buffer_sort kts_p1(),kb_p1()    
+hc2=1
+exit for
+end if
+next
+
+if hc2=1 then
+for i=1 to 28
+if kb_p1(i)="37U" then
 
 if tts_u_p1(8)>=1 then
-
-mb_keyboard_buffer_sort kts_p1(),kb_p1()    
-
-for i=1 to 29
-if kb_p1(i)="37U" or kb_p1(i)="37D" then
-
-for i2=i+2 to 30
+for i2=i+1 to 30
 if mid(kb_p1(i2),1,2)="38" then exit for
 if mid(kb_p1(i2),1,2)="40" then exit for
 
 if mid(kb_p1(i2),1,2)="39" then ft=1:att=kts_p1(i2)-kts_p1(i2-1):exit for
 next
 
-for i2=i+2 to 30
+for i2=i+1 to 30
 if mid(kb_p1(i2),1,2)="65" then exit for
 if mid(kb_p1(i2),1,2)="68" then exit for
 if mid(kb_p1(i2),1,2)="90" then exit for
@@ -110,39 +117,46 @@ if mid(kb_p1(i2),1,2)="67" then exit for
 if mid(kb_p1(i2),1,2)="83" then hc=1:hct=kts_p1(i2)-kts_p1(i2-1):exit for
 next
 
-if hc=1 and hct<=.1 and ft=1 and att<=.1  then
+if hc=1 and hct<=.2 and ft=1 and att<=.1  then
 cls
 
-? "Sonic Boom!",tts_u_p1(8)
+print "Sonic Boom!",tts_u_p1(8)
 
 play_sound_mc sound(1)
 
-? kb_p1(1)
+print kb_p1(1)
 for i2=2 to 30
-? kb_p1(i2),kts_p1(i2)-kts_p1(i2-1)    
+print kb_p1(i2),kts_p1(i2)-kts_p1(i2-1)    
 next    
 
 tts_u_p1(8)=0 
 
 cls
 mb_kb_clear_p1
-'return 1
+
 sonicboom_motion_check_p1=1
 exit function
 end if
+
+end if
+end if
+next
+
 end if
 
-
-next
-end if    
-'return 0
 sonicboom_motion_check_p1=0
 end function
 '===============================================================================
 sub player1_motions_sub
 'house all motion detection functions in a single sub    
-if hadoken_motion_check_p1=1 then exit sub
-if sonicboom_motion_check_p1=1 then exit sub
+if hadoken_motion_check_p1=1 then 
+mb_kb_clear_p1
+exit sub
+end if
+if sonicboom_motion_check_p1=1 then 
+mb_kb_clear_p1
+exit sub
+end if
 end sub
 '===============================================================================
 screenres 640,480,32
@@ -186,18 +200,18 @@ locate 1,1
 for i=1 to nok_p1
 select case kcs_p1(i)
 case 1
-? scan_codes_p1(i),"Down      ",kps_p1(i),tts_d_p1(i)
+print scan_codes_p1(i),"Down      ",kps_p1(i),tts_d_p1(i)
 case 0
-? scan_codes_p1(i),"-         ",kps_p1(i),tts_u_p1(i)
+print scan_codes_p1(i),"-         ",kps_p1(i),tts_u_p1(i)
 end select
 next
-if p1kb_tog="Y" then
+
 player1_motions_sub
 p1kb_tog="N" 'always set this back to "N" after checking motions
-end if
-?
+
+print
 for i=1 to 30
-? kb_p1(i),str(kts_p1(i))+"                     "
+print kb_p1(i),str(kts_p1(i))+"                     "
 next
 loop until inkey = chr(27)
 close_sound
