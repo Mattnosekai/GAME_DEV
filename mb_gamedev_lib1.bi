@@ -5,6 +5,7 @@
 #define RGBA_A( c ) ( CUInt( c ) Shr 24         )
 '##############################
 'mb_gamedev_lib is a library for game developement 
+'Compiled using FreeBASIC version 1.06.0 32 bit win32
 '##############################
 dim shared as integer s_xwidth,s_ywidth,s_cdepth
 
@@ -18,6 +19,71 @@ sdis as string 'sprite description string
 pvalue as integer 'priority value of sprite
 flipv as integer 'sprite flip data 0=Normal 1=Flip X 2=Flip Y 3=Flip X & Y
 END TYPE
+
+'Data Structure for objects with a single collision detection box
+TYPE OBJECTZ
+x as integer
+y as integer
+xwidth as integer
+ywidth as integer
+active as string
+conoff as integer 'collisions on/off 1=On
+uname as string
+END TYPE  
+
+Dim Shared ObjectCount as integer 
+ObjectCount=0 
+'#####################################################################################################
+'#####################################################################################################
+'Data Structure for  Animation/Object
+'current X
+'current Y
+'number of frames
+
+'unique delay between each frame
+
+'sound table index
+'number of collision boxes for frame
+'collision box data
+'starting time of animation
+'current frame number
+'frame state notes/description string
+
+'xwidth
+'ywidth
+'filename
+'spritebuf
+'sdis
+'pvalue
+'flipv
+
+'Data Structure for  Animation/Object
+TYPE ANIM_OBJ
+xwidth(1 to 100) as integer 'sprite width
+ywidth(1 to 100) as integer 'sprite height
+filename(1 to 100) as string 'file name of sprite
+spritebuf(1 to 100) as any ptr 'pointer to memory of sprite data
+sdis(1 to 100) as string 'sprite description string
+pvalue(1 to 100) as integer 'priority value of sprite
+flipv(1 to 100) as integer 'sprite flip data 0=Normal 1=Flip X 2=Flip Y 3=Flip X & Y    
+    
+curx as integer 'Current X
+cury as integer 'Current Y
+nof as integer 'number of frames
+frameindex(1 to 100) as integer 'frame index
+soundz(1 to 100) as integer 'sound table index -1=no sound
+nocb(1 to 100) as integer 'number of collision boxes for frame
+cbd_x1(1 to 100) as integer 'collision box data x1
+cbd_y1(1 to 100) as integer 'collision box data y1
+cbd_x1w(1 to 100) as integer 'collision box data x1 width
+cbd_y1w(1 to 100) as integer 'collision box data y1 width
+fsta(1 to 100) as string 'frame state string general purpose
+cfn as integer 'current frame number
+sta as double 'starting time of animation
+fand as string 'animation notes/description string
+timing(1 to 100) as double 'delay between each frame 
+END TYPE
+'#####################################################################################################
 '#####################################################################################################
 'mb_gamedev_lib
 declare sub SET_SCREEN(xwidth1 as integer,ywidth1 as integer,cdepth1 as integer,wintitle as string)
@@ -69,6 +135,11 @@ declare function GET_CX(xcoord as integer,varz as sprite) as integer
 declare function GET_BY(ycoord as integer,varz as sprite) as integer
 declare sub CIRCLE_PATH2(x0 As Integer, y0 As Integer, radius as integer,xcords() as integer,ycords() as integer,byref numsteps as integer)
 declare sub MAKE_PATH_ARRAY(inx() as integer,iny() as integer,outx() as integer,outy() as integer,numsteps as integer)
+declare sub UARC_PATH2(x0 As Integer, y0 As Integer, radius as integer,xcords() as integer,ycords() as integer, byref numsteps as integer)
+declare sub DARC_PATH2(x0 As Integer, y0 As Integer, radius as integer,xcords() as integer,ycords() as integer,byref numsteps as integer)
+declare function COLLISION(x1 as integer,y1 as integer,x1width as integer,y1width as integer,x2 as integer,y2 as integer,x2width as integer,y2width as integer) as integer
+declare function COLLISION_CHECK(object1 as objectz,object2() as objectz) as string
+declare sub TRANSLATE_CORDS(byref cx1 as integer,byref cy1 as integer,cbx as integer,cby as integer)
 '#####################################################################################################
 '===============================================================================
 SUB SET_SCREEN(xwidth1 as integer,ywidth1 as integer,cdepth1 as integer,wintitle as string)
@@ -1527,5 +1598,148 @@ outx(nam)=inx(nam)-inx(nam-1)
 outy(nam)=iny(nam)-iny(nam-1)
 next    
     
+END SUB
+'===============================================================================
+SUB UARC_PATH2(x0 As Integer, y0 As Integer, radius as integer,xcords() as integer,ycords() as integer,byref numsteps as integer)
+'Use this, better than uarc_path
+'Returns cordinates for a upper half circle
+'Half Circle begins at beginning of half circle on left side
+dim as integer x,y,px,py,jx,jy,nam,angle
+px=x0
+py=y0+radius
+jx=x0
+jy=y0
+angle=180
+numsteps=0
+
+for nam=180 to 360
+    x = x0+radius*cos(2.0*3.14*angle/360.0)    
+    y = y0+radius*sin(2.0*3.14*angle/360.0)
+
+    if x>px then jx=jx+abs(x-px)
+    if x<px then jx=jx-abs(x-px)
+    if y>py then jy=jy+abs(y-py)
+    if y<py then jy=jy-abs(y-py)
+    px=x
+    py=y
+numsteps=numsteps+1    
+xcords(numsteps)=jx  
+ycords(numsteps)=jy 
+angle=angle+1
+if angle>360 then angle=0    
+next    
+END SUB
+'===============================================================================
+SUB DARC_PATH2(x0 As Integer, y0 As Integer, radius as integer,xcords() as integer,ycords() as integer,byref numsteps as integer)
+'Use this, better than darc_path
+'Returns cordinates for a lower half circle
+'Half Circle begins at beginning of half circle on right side
+dim as integer x,y,px,py,jx,jy,nam,angle
+px=x0
+py=y0+radius
+jx=x0
+jy=y0
+angle=0
+numsteps=0
+
+for nam=0 to 179
+    x = x0+radius*cos(2.0*3.14*angle/360.0)    
+    y = y0+radius*sin(2.0*3.14*angle/360.0)
+
+    if x>px then jx=jx+abs(x-px)
+    if x<px then jx=jx-abs(x-px)
+    if y>py then jy=jy+abs(y-py)
+    if y<py then jy=jy-abs(y-py)
+    px=x
+    py=y
+numsteps=numsteps+1    
+xcords(numsteps)=jx  
+ycords(numsteps)=jy 
+angle=angle+1
+if angle>360 then angle=0    
+next    
+END SUB
+'===============================================================================
+
+
+'Data Structure for  Animation/Object
+'TYPE ANIM_OBJ
+'xwidth(1 to 100) as integer 'sprite width
+'ywidth(1 to 100) as integer 'sprite height
+'filename(1 to 100) as string 'file name of sprite
+'spritebuf(1 to 100) as any ptr 'pointer to memory of sprite data
+'sdis(1 to 100) as string 'sprite description string
+'pvalue(1 to 100) as integer 'priority value of sprite
+'flipv(1 to 100) as integer 'sprite flip data 0=Normal 1=Flip X 2=Flip Y 3=Flip X & Y    
+    
+'curx as integer 'Current X
+'cury as integer 'Current Y
+'nof as integer 'number of frames
+'frameindex(1 to 100) as integer 'frame index
+'soundz(1 to 100) as integer 'sound table index -1=no sound
+'nocb(1 to 100) as integer 'number of collision boxes for frame
+'cbd_x1(1 to 100) as integer 'collision box data x1
+'cbd_y1(1 to 100) as integer 'collision box data y1
+'cbd_x1w(1 to 100) as integer 'collision box data x1 width
+'cbd_y1w(1 to 100) as integer 'collision box data y1 width
+'fsta(1 to 100) as string 'frame state string general purpose
+'cfn as integer 'current frame number
+'sta as double 'starting time of animation
+'fand as string 'animation notes/description string
+'timing(1 to 100) as double 'delay between each frame 
+'END TYPE
+'SUB LOAD_SPRITE(varz as sprite,fname as string)
+''loads an image to an array using the sprite data structure 
+'varz.xwidth=GET_BMP_WIDTH(fname) 
+'varz.ywidth=GET_BMP_HEIGHT(fname)
+'varz.filename=fname
+'varz.spritebuf=ImageCreate(varz.xwidth-1, varz.ywidth-1, RGB(0, 0, 0) )
+'load_image varz.spritebuf,fname  
+'END SUB 
+
+'===============================================================================
+FUNCTION COLLISION(x1 as integer,y1 as integer,x1width as integer,y1width as integer,x2 as integer,y2 as integer,x2width as integer,y2width as integer) as integer
+'Returns 1 if a collision occured. Returns 0 if no collision happened.
+COLLISION=0
+if x1+x1width>=x2 then
+    if x1<=x2+x2width then
+        if y1+y1width>=y2 then
+            if y1<=y2+y2width then COLLISION=1
+        end if
+    end if
+end if
+END FUNCTION
+'===============================================================================
+FUNCTION COLLISION_CHECK(object1 as objectz,object2() as objectz) as string
+'The global variable ObjectCount must be set to reflect the current amount of active objects
+'Returns if a collision happened or not among a number of objects.
+'If a collision occurs it will return the unique names of the objects that collided.
+dim nam as long
+dim CC as string
+COLLISION_CHECK=""
+CC=""
+for nam=1 to ObjectCount    
+    if object1.uname=object2(nam).uname then
+    else
+    if object2(nam).conoff=1 then
+    if COLLISION(object1.x,object1.y,object1.xwidth,object1.ywidth,object2(nam).x,object2(nam).y,object2(nam).xwidth,object2(nam).ywidth)=1 then
+    CC=CC+"YES,"+object1.uname+","+object2(nam).uname+","':exit function
+    end if
+    end if
+    end if
+next
+if len(CC)=0 then 
+    COLLISION_CHECK="NO"
+else
+    COLLISION_CHECK=CC
+end if    
+END FUNCTION 
+'===============================================================================
+SUB TRANSLATE_CORDS(byref cx1 as integer,byref cy1 as integer,cbx as integer,cby as integer)
+'Translate Collision Box Coordinates to current coordinates.
+'cx1 cy1 = current coordinates
+'cbx cby = collision box offsets
+cx1=cx1+cbx
+cy1=cy1+cby
 END SUB
 '===============================================================================
