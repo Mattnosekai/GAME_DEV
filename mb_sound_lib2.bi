@@ -113,4 +113,10 @@ SUB STOP_SOUND(sound_num as integer)
 fbs_Set_SoundLoops (sound_num,0)    
 END SUB    
 '===============================================================================
+SUB FREE_SOUND_MEMORY(byval h_wave as integer ptr)
+'Destroys the sound/frees up RAM
+'Remember to put byval before the variable name when passing it to this sub
+fbs_destroy_wave(byval h_wave)
+END SUB    
+'===============================================================================
 '###############################################################################

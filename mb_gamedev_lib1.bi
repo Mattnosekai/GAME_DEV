@@ -1806,3 +1806,80 @@ next
 
 END SUB
 '===============================================================================
+SUB MATT_NO_SEKAI_INTRO2(sound1 as integer,sound2 as integer,sound3 as integer,sound4 as integer)
+
+
+'Displays the Matt no Sekai intro/logo and sound.
+
+'Assumes screen resolution already set to 640x480
+'Assumes sound library is already loaded via prepare_sound.
+'Assumes sounds files and logo bitmap are in same directory.
+'dim as integer hWave(30),sound(30),lasts 
+
+
+'LOAD_MP3_TO_MEM "MW_1.mp3",hWave(0),sound(0),@sound(0)
+'LOAD_MP3_TO_MEM "MW_2.mp3",hWave(1),sound(1),@sound(1)
+'LOAD_MP3_TO_MEM "MW_4.mp3",hWave(3),sound(3),@sound(3)
+'LOAD_MP3_TO_MEM "MW_5.mp3",hWave(4),sound(4),@sound(4)
+
+Dim buffer1 As Any Ptr = ImageCreate( 640, 480, RGB(255, 255, 255) )
+Dim toscreen As Any Ptr = ImageCreate( 640, 480, RGB(255, 255, 255) )
+
+load_image buffer1,"MATTS_WORLD_L.BMP"
+
+dim as double t,tol
+dim as any ptr j,tmp,tmp2
+dim as integer a
+j = imagecreate (640, 480, RGB(0,0,0))
+tmp=imagecreate (640, 480, RGB(255,255,255))
+tmp2=imagecreate (640, 480, RGB(255,255,255))
+t=timer
+
+PLAY_SOUND_MC sound1
+t=timer
+do
+loop until (timer-t)>=.3
+PLAY_SOUND_MC sound2
+
+for a = 255 to 100 step -1
+tol=timer
+   PUT tmp,(0, 0), tmp2, PSET 
+   PUT tmp,(0, 0), j, ALPHA, a
+   PUT (0, 0), tmp, PSET
+   
+do
+loop until (timer-t)>=.001
+t=timer
+do
+loop until (timer-tol)>=.002857    
+next 
+
+do
+loop until IS_PLAYING(sound2)="NO" 
+
+PLAY_SOUND_MC sound3
+t=timer
+do
+loop until (timer-t)>=.3
+
+PLAY_SOUND_MC sound4
+for a = 255 to 1 step -1
+tol=timer
+   PUT tmp,(0, 0), tmp2, PSET 
+   PUT tmp,(8, 0), buffer1, PSET  
+   PUT tmp,(0, 0), j, ALPHA, a
+   PUT (0, 0), tmp, PSET
+do
+loop until (timer-t)>=.001
+t=timer
+do
+loop until (timer-tol)>=.002857 
+next 
+
+ PUT tmp,(0, 0), tmp2, PSET 
+ PUT tmp,(8, 0), buffer1, PSET  
+t=timer
+do
+loop until (timer-t)>=5
+END SUB
+'===============================================================================
