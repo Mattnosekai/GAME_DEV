@@ -13,7 +13,7 @@ dim as boolean ok
 
 dim as integer spos
 
-matt_no_sekai_intro 'Intro Logo & Sound
+'matt_no_sekai_intro 'Intro Logo & Sound
 
 SUB mb_kb_clear_p1t
 'clear Player 1's keyboard buffer timers only
@@ -165,7 +165,16 @@ LOAD_MP3_TO_MEM "sounds/tatsu.mp3",hWave(6),sound(6),@sound(6)
 LOAD_MP3_TO_MEM "sounds/MW_5.mp3",hWave(7),sound(7),@sound(7)
 LOAD_MP3_TO_MEM "sounds/Matt_SD1.mp3",hWave(8),sound(8),@sound(8)
 LOAD_MP3_TO_MEM "sounds/SF_Ryu.mp3",hWave(9),sound(9),@sound(9)
+LOAD_MP3_TO_MEM "MW_1.mp3",hWave(10),sound(10),@sound(10)
+LOAD_MP3_TO_MEM "MW_2.mp3",hWave(11),sound(11),@sound(11)
+LOAD_MP3_TO_MEM "MW_4.mp3",hWave(12),sound(12),@sound(12)
 
+'LOAD_MP3_TO_MEM "MW_1.mp3",hWave(0),sound(0),@sound(0)
+'LOAD_MP3_TO_MEM "MW_2.mp3",hWave(1),sound(1),@sound(1)
+'LOAD_MP3_TO_MEM "MW_4.mp3",hWave(3),sound(3),@sound(3)
+'LOAD_MP3_TO_MEM "MW_5.mp3",hWave(4),sound(4),@sound(4) 7
+
+matt_no_sekai_intro2 sound(10),sound(11),sound(12),sound(7)
 
 nok_p1=15 'A total of 15 keys are active for Player 1 
 scan_codes_p1(1)=65 'A
